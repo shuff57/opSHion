@@ -1,0 +1,17 @@
+{
+  "name": "opshion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node functions/api/classdata.test.mjs && node --test tests/*.test.mjs",
+    "test:browser": "python tests/browser.py"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
