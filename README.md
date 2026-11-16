@@ -57,7 +57,7 @@ https://opshion.lefthanddev.com/?code=ABC234&activity=pulse
 
 Create a room in opSHion first; `ABC234` is an example. Room codes belong to this app's database. Existing bookSHelf codes are not automatically migrated.
 
-The public catalog is at `/api/catalog`. The `/api/classdata/` routes retain the bookSHelf contract for numeric values, outcome tallies and structured records. Browser writes are same-origin; integrations should open the student app instead of sending cross-origin requests.
+The public catalog is at `/api/catalog`. The `/api/classdata/` routes retain the bookSHelf contract for numeric values, outcome tallies and structured records. The deployed book at `https://oerbookshelf.app` is allowed to create rooms and read or submit class data through a restricted CORS policy. Other browser origins remain blocked. Student QR links open this app directly. The book’s 5.1 pulse histogram reads the same pool as the opSHion pulse entry page.
 
 ## Data and limits
 

@@ -35,3 +35,19 @@ test('public app, shared tosses, idempotent updates, numeric values, and origin 
   assert.ok(pooled.r.headers.get('Content-Security-Policy'));
   env.DB.close();
 });
+
+test('only the textbook origin can use the classroom API across origins', async () => {
+  const env = { DB: database() };
+  const url = 'https://opshion.test/api/classdata/class';
+  const req = (method, origin) => new Request(url, { method, headers: { Origin: origin, 'CF-Connecting-IP': '192.0.2.3', 'Content-Type': 'application/json' }, ...(method === 'POST' ? { body: '{}' } : {}) });
+  const preflight = await worker.fetch(req('OPTIONS', 'https://oerbookshelf.app'), env);
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('Access-Control-Allow-Origin'), 'https://oerbookshelf.app');
+  assert.match(preflight.headers.get('Access-Control-Allow-Headers'), /X-Teacher-Key/);
+  const created = await worker.fetch(req('POST', 'https://oerbookshelf.app'), env);
+  assert.equal(created.status, 201);
+  assert.equal(created.headers.get('Access-Control-Allow-Origin'), 'https://oerbookshelf.app');
+  assert.equal((await worker.fetch(req('OPTIONS', 'https://unrelated.test'), env)).status, 403);
+  assert.equal((await worker.fetch(req('POST', 'https://unrelated.test'), env)).status, 403);
+  env.DB.close();
+});

@@ -6,7 +6,7 @@ const env = { DB: database() };
 const server = createServer(async (req, res) => {
   try {
     let body = ''; for await (const chunk of req) body += chunk;
-    const r = new Request('http://' + req.headers.host + req.url, { method: req.method, headers: { ...req.headers, 'CF-Connecting-IP': '192.0.2.1' }, ...(!['GET', 'HEAD'].includes(req.method) ? { body } : {}) });
+    const r = new Request((process.env.OPSHION_TEST_ORIGIN || 'http://' + req.headers.host) + req.url, { method: req.method, headers: { ...req.headers, 'CF-Connecting-IP': '192.0.2.1' }, ...(!['GET', 'HEAD'].includes(req.method) ? { body } : {}) });
     const out = await worker.fetch(r, env);
     res.writeHead(out.status, Object.fromEntries(out.headers)); res.end(Buffer.from(await out.arrayBuffer()));
   } catch (e) { res.writeHead(500); res.end('Test harness failed'); }

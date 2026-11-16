@@ -551,6 +551,7 @@ export async function handle(request, env) {
     if (origin !== null) {
       let ok = false;
       try { ok = new URL(origin).origin === url.origin; } catch { ok = false; }
+      if (!ok && Array.isArray(env.CLASSDATA_ALLOWED_ORIGINS)) ok = env.CLASSDATA_ALLOWED_ORIGINS.includes(origin);
       if (!ok) return err('Cross-origin requests are not allowed.', 403);
     }
   }
