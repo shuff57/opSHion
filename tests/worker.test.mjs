@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import worker from '../dist/server/index.js';
 import { database } from './db.mjs';
+import { TOPICS, TALLY_TOPICS, RECORD_TOPICS } from '../functions/_lib/classdata_topics.js';
 
 test('public app, shared tosses, idempotent updates, numeric values, and origin isolation', async () => {
   const env = { DB: database() };
@@ -49,5 +50,38 @@ test('only the textbook origin can use the classroom API across origins', async 
   assert.equal(created.headers.get('Access-Control-Allow-Origin'), 'https://oerbookshelf.app');
   assert.equal((await worker.fetch(req('OPTIONS', 'https://unrelated.test'), env)).status, 403);
   assert.equal((await worker.fetch(req('POST', 'https://unrelated.test'), env)).status, 403);
+  env.DB.close();
+});
+
+
+test('every textbook topic is available and assignment reveals only the assigned prompt', async () => {
+  const env = { DB: database() };
+  const call = async (path, body) => {
+    const r = await worker.fetch(new Request('https://opshion.test/api/' + path, { method: body ? 'POST' : 'GET', headers: { 'CF-Connecting-IP': '192.0.2.9', ...(body ? { 'Content-Type': 'application/json' } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}) }), env);
+    return { status: r.status, data: await r.json() };
+  };
+  const { data: catalog } = await call('catalog');
+  const ids = catalog.map(a => a.id);
+  assert.equal(ids.length, new Set(ids).size);
+  for (const id of [...Object.keys(TOPICS), ...Object.keys(TALLY_TOPICS), ...Object.keys(RECORD_TOPICS), 'pulse-commute', 'height-pulse', 'playlist']) assert.ok(ids.includes(id), id);
+  for (const a of catalog) assert.ok(a.title && a.prompt && a.label && a.source, a.id);
+  assert.equal(catalog.find(a => a.id === 'anchor').randomize, undefined);
+  assert.ok(!JSON.stringify(catalog).includes('1,500'));
+  assert.ok(!JSON.stringify(catalog).includes('6,000'));
+  const { data: { code } } = await call('classdata/class', {});
+  const assigned = await call('classdata/assign', { code, topic: 'anchor', device: 'assignment-test-device' });
+  assert.equal(assigned.status, 200);
+  assert.equal(assigned.data.prompt, RECORD_TOPICS.anchor.randomize.groups[assigned.data.group].prompt);
+  const again = await call('classdata/assign', { code, topic: 'anchor', device: 'assignment-test-device' });
+  assert.deepEqual(again.data, assigned.data);
+  // Record writes remain partial, decimals remain display units, and commute is shared.
+  for (const [topic, values] of [['alphabet', { seconds: 5.83 }], ['sleep', { wake: 405, hours: 7.5 }], ['planes', { metres: 4.3 }], ['trip', { way: 2, minutes: 18 }]]) {
+    assert.equal((await call('classdata/record', { code, topic, device: 'record-test-device', values })).status, 200);
+  }
+  assert.deepEqual((await call('classdata/values?code=' + code + '&topic=alphabet&field=seconds')).data.values, [5.83]);
+  assert.deepEqual((await call('classdata/values?code=' + code + '&topic=sleep&field=wake')).data.values, [405]);
+  assert.deepEqual((await call('classdata/values?code=' + code + '&topic=planes&field=metres')).data.values, [4.3]);
+  assert.deepEqual((await call('classdata/values?code=' + code + '&topic=commute')).data.values, [18]);
+  assert.equal((await call('classdata/records?code=' + code + '&topic=alphabet')).status, 403);
   env.DB.close();
 });

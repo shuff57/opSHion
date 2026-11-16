@@ -12,10 +12,12 @@ Start a room, project its QR code, and let students contribute from their phones
 
 - **Coin toss lab:** fair virtual coin tosses, individually or in batches of 10 or 100.
 - **Real coin tally:** enter observed heads and tails, or tap each result.
-- **Real dice and two-coin experiments:** share outcome counts.
-- **Class data:** enter resting pulse, height in centimeters, or commute time in minutes.
+- **Real chance experiments:** share observed counts for dice, coin pairs, spinners, tile bags, cup draws, surveys, ring toss, and second-hand readings. Each book experiment keeps its own pool.
+- **Class measurements:** resting pulse, height, commute time, five-rent averages, one song, and four-song totals.
+- **Record activities:** alphabet timing, school-day sleep, randomized distance guesses, paper-plane distances, and trips to school. Choose which fields to share; later submissions preserve earlier fields.
+- **Combined entry pages:** pulse with commute, height with pulse, and one song with a four-song playlist. These write the same measurement pools used by the individual activities and textbook.
 
-Real observations and simulated tosses use separate pools. Each device contributes its own tally or one numeric value per activity; resubmitting replaces that contribution. Results refresh every five seconds, and can be downloaded as CSV. No contribution is sent until a student acts. Failed writes remain on the device with a retry action.
+Real observations and simulated tosses use separate pools. Each device contributes its own tally, value, or record per activity; resubmitting replaces only the answers it sends. Results refresh every five seconds, and can be downloaded as CSV. Opening the distance-guess activity asks the server to assign this device a question; the app shows only that assigned prompt. Class comparisons and CSV remain hidden until the student submits a guess. Other answers are sent when the student acts. Failed writes remain on the device with a retry action.
 
 ## Run and test
 
@@ -37,7 +39,7 @@ python -m playwright install chromium
 npm run test:browser
 ```
 
-The browser suite starts an ephemeral local test server with in-memory SQLite. It checks QR decoding, joining on fresh devices, multiple contributors, reloads without duplicates, numeric updates, CSV downloads, invalid codes and phone layout. This test harness is never deployed.
+The browser suite starts an ephemeral local test server with in-memory SQLite. It checks QR decoding, fresh devices, multiple contributors, reloads, numeric and record updates, all four record field kinds, assigned-prompt privacy, real tally entry, combined activity pools, CSV downloads, invalid codes, and phone layout. This test harness is never deployed.
 
 ## Deploy
 
@@ -59,13 +61,13 @@ https://opshion.lefthanddev.com/?code=ABC234&activity=pulse
 
 Create a room in opSHion first; `ABC234` is an example. Room codes belong to this app's database. Existing bookSHelf codes are not automatically migrated.
 
-The public catalog is at `/api/catalog`. The `/api/classdata/` routes retain the bookSHelf contract for numeric values, outcome tallies and structured records. The deployed book at `https://oerbookshelf.app` is allowed to create rooms and read or submit class data through a restricted CORS policy. Other browser origins remain blocked. Student QR links open this app directly. The book’s 5.1 pulse histogram reads the same pool as the opSHion pulse entry page.
+The public catalog at `/api/catalog` includes every scalar, tally, and record topic from `functions/_lib/classdata_topics.js`, with the registry IDs retained in links. Combined entry links use `pulse-commute`, `height-pulse`, and `playlist`. The `/api/classdata/` routes retain the bookSHelf contract for numeric values, outcome tallies and structured records. The deployed book at `https://oerbookshelf.app` is allowed to create rooms and read or submit class data through a restricted CORS policy. Other browser origins remain blocked. Student QR links open this app directly. The book’s 5.1 pulse histogram reads the same pool as the opSHion pulse entry page.
 
 ## Data and limits
 
 The service stores numbers and outcome counts, not student names or email addresses. A browser keeps a random device ID; the server stores its hash scoped to the room. Clearing browser storage creates a new device, so this is a classroom exploration tool, not authenticated assessment. Room codes permit anyone who knows the code to contribute and see the shared results.
 
-Teacher keys stay on the creating device and are never included in QR links. The service applies per-network and per-class write limits. Class data expires after 400 days and is cleaned up when new rooms are created. Numeric results are anonymous but visible to room participants; avoid entering identifying data. This initial frontend does not expose teacher moderation or custom question authoring.
+Teacher keys stay on the creating device and are never included in QR links. The service applies per-network and per-class write limits. Class data expires after 400 days and is cleaned up when new rooms are created. Unlinked record activities (alphabet, sleep, and planes) show and export one field at a time so answers cannot be matched into individual records. Trip and distance-guess activities retain their intended linked rows. Clock values appear as times and decimals stay in display units in results and CSV. Numeric results are anonymous but visible to room participants; avoid entering identifying data. This initial frontend does not expose teacher moderation or custom question authoring.
 
 ## Source
 
