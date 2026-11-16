@@ -2,7 +2,9 @@
 
 A public classroom lab for shared polls, chance simulations, and real data.
 
-**Student app:** https://opshion.lefthanddev.com
+**Try the student app:** https://opshion.elvenavocet3.chatgpt.site
+
+**Custom domain (DNS validation pending):** https://opshion.lefthanddev.com
 
 Start a room, project its QR code, and let students contribute from their phones. No accounts or names are required. Every room has a six-character code; a QR link includes both the code and the activity. Anyone can start a room and try it.
 
