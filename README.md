@@ -2,9 +2,7 @@
 
 A public classroom lab for shared polls, chance simulations, and real data.
 
-**Try the student app:** https://opshion.elvenavocet3.chatgpt.site
-
-**Custom domain (DNS validation pending):** https://opshion.lefthanddev.com
+**Try the student app:** https://opshion.lefthanddev.com
 
 Start a room, project its QR code, and let students contribute from their phones. No accounts or names are required. Every room has a six-character code; a QR link includes both the code and the activity. Anyone can start a room and try it.
 
@@ -43,11 +41,24 @@ The browser suite starts an ephemeral local test server with in-memory SQLite. I
 
 ## Deploy
 
-The production app is a Cloudflare Worker with a D1 database. `npm run build` bundles the frontend and API into `dist/server/index.js`. `.openai/hosting.json` identifies the Sites project and its `DB` binding. The Sites workflow packages that output and applies the schema in `drizzle/` before deploying.
+The production app is a Cloudflare Worker with a D1 database, served at https://opshion.lefthanddev.com. `npm run build` bundles the frontend and API into `dist/server/index.js`; the Worker expects one D1 binding named `DB`.
+
+To deploy to your own Cloudflare account:
+
+```sh
+npm ci && npm run build
+npx wrangler login
+npx wrangler d1 create opshion                 # note the database_id it prints
+cp wrangler.example.jsonc wrangler.jsonc       # paste the database_id; set your own hostname
+npx wrangler d1 execute opshion --remote --file drizzle/0000_class_data.sql
+npx wrangler deploy
+```
+
+`wrangler.example.jsonc` shows the `DB` binding and a custom-domain route. Your copy `wrangler.jsonc` holds your database ID and is gitignored. The custom hostname's zone must be on the same Cloudflare account; Wrangler creates the DNS record for a `custom_domain` route.
 
 `drizzle/0000_class_data.sql` is the initial production migration. Append future migrations rather than modifying applied SQL. `migrations/` retains the individual API migrations used by the inherited regression suite.
 
-Public GitHub pushes do **not** publish the app automatically. Deploy a tested source commit through Sites, then verify the public endpoint. The custom domain must point to the DNS target returned by Sites.
+Public GitHub pushes do **not** publish the app automatically. Deploy a tested source commit with `npx wrangler deploy`, then verify the public endpoint (`/api/catalog`, then create a room).
 
 ## Embed in a textbook or another app
 

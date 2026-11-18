@@ -1,0 +1,16 @@
+{
+  // Copy to wrangler.jsonc and fill in your own values. wrangler.jsonc is gitignored.
+  "name": "opshion",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": true,
+  // Remove this line to serve only from <name>.<account>.workers.dev.
+  "routes": [{ "pattern": "opshion.example.com", "custom_domain": true }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "opshion",
+      "database_id": "REPLACE_WITH_YOUR_DATABASE_ID"
+    }
+  ]
+}
