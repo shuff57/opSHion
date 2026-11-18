@@ -18,7 +18,7 @@ try:
         errors = []
         page.on('pageerror', lambda e: errors.append(str(e)))
         page.goto(base)
-        expect(page.locator('.activity')).to_have_count(31)
+        expect(page.locator('.activity')).to_have_count(34)
         page.locator('#start').click()
         page.locator('#qr svg').wait_for()
         link = page.locator('#share-link').input_value()

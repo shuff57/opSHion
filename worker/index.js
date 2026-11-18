@@ -9,6 +9,7 @@ import { TOPICS, TALLY_TOPICS, RECORD_TOPICS } from '../functions/_lib/classdata
 const VALUE_TITLES = {
   pulse: 'Resting pulse', height: 'How tall are we?', commute: 'The trip to school',
   's61-rent5': 'Five rent cards', 's62-song': 'One song', 's62-run4': 'Four-song playlist',
+  'ready-minutes': 'Getting ready yesterday', 'birth-day': 'The day you were born',
 };
 const TALLY_DETAILS = {
   'coin-sim': ['Coin toss lab', 'Toss a fair virtual coin. How close does the class get to half heads?'],
@@ -29,7 +30,7 @@ const TALLY_DETAILS = {
   's45-clock': ['Second-hand readings', 'Observe a real clock’s second hand at the times chosen in the activity. Record which five-second interval contains each reading.'],
   's63-spin8': ['Spinner sample', 'Spin the activity’s eight-slice spinner, labeled 1 to 8. Record the slice for every spin.'],
 };
-const RECORD_TITLES = { alphabet: 'Alphabet stopwatch', sleep: 'School-day sleep', anchor: 'A guess after a number', planes: 'Paper-plane distances', trip: 'Getting to school' };
+const RECORD_TITLES = { alphabet: 'Alphabet stopwatch', sleep: 'School-day sleep', anchor: 'A guess after a number', planes: 'Paper-plane distances', trip: 'Getting to school', paidwork: 'Work for pay last week' };
 const scalar = t => ({ ...t, kind: 'value', title: VALUE_TITLES[t.id], label: t.unit, prompt: t.question, source: 'Class data' });
 const CATALOG = [
   ...Object.values(TALLY_TOPICS).slice(0, 2).map(t => ({ ...t, kind: 'tally', title: TALLY_DETAILS[t.id][0], label: t.noun, prompt: TALLY_DETAILS[t.id][1], source: t.id === 'coin-sim' ? 'Simulated' : 'Real observations' })),

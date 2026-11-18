@@ -37,10 +37,13 @@ const mk = async (env, ip) => J(await call(env, "POST", "/class", { body: {}, ip
 const put = (env, code, topic, value, n, extra = {}) => call(env, "POST", "/value", { body: { code, topic, value, device: dev(n) }, ...extra });
 
 // registry
-assert.deepEqual(Object.keys(TOPICS), ["pulse", "height", "commute", "s61-rent5", "s62-song", "s62-run4"]);
+assert.deepEqual(Object.keys(TOPICS), ["pulse", "height", "commute", "s61-rent5", "s62-song", "s62-run4", "ready-minutes", "birth-day"]);
 // chapter 6 data-set topics (Real/Sim redo 2026-11-13): a student's own result of one round
 assert.deepEqual(["s61-rent5", "s62-song", "s62-run4"].map(k => [TOPICS[k].id, TOPICS[k].min, TOPICS[k].max, TOPICS[k].unit]),
   [["s61-rent5", 650, 3200, "dollars"], ["s62-song", 2, 9, "minutes"], ["s62-run4", 8, 36, "minutes"]]);
+// chapter 7 class-data topics (2026-11-17): 7.1 minutes getting ready, 7.2 the day of the month a student was born
+assert.deepEqual(["ready-minutes", "birth-day"].map(k => [TOPICS[k].id, TOPICS[k].min, TOPICS[k].max, TOPICS[k].unit]),
+  [["ready-minutes", 0, 180, "minutes"], ["birth-day", 1, 31, "day of the month"]]);
 for (const k of Object.keys(TOPICS)) assert.ok(Object.isFrozen(TOPICS[k]), k);
 assert.deepEqual([TOPICS.pulse.min, TOPICS.pulse.max, TOPICS.height.min, TOPICS.height.max, TOPICS.commute.min, TOPICS.commute.max], [40, 140, 120, 220, 0, 180]);
 assert.equal(getTopic("__proto__"), null); assert.equal(getTopic("toString"), null); assert.equal(getTopic(7), null);
@@ -320,12 +323,12 @@ const vals = async (env, q, headers) => J(await call(env, "GET", "/values?" + q,
 const recs = async (env, code, topic, headers) => J(await call(env, "GET", `/records?code=${code}&topic=${topic}`, { headers }));
 
 // registry: one topic per activity, carried across the sections that reuse its pool; chapter 5's three are untouched
-assert.deepEqual(Object.keys(RECORD_TOPICS), ["alphabet", "sleep", "anchor", "planes", "trip"]);
+assert.deepEqual(Object.keys(RECORD_TOPICS), ["alphabet", "sleep", "anchor", "planes", "trip", "paidwork"]);
 assert.deepEqual(Object.fromEntries(Object.values(RECORD_TOPICS).map(t => [t.id, t.sections])),
-  { alphabet: ["1.2", "2.2"], sleep: ["1.3", "2.6"], anchor: ["1.4"], planes: ["2.1", "2.3"], trip: ["2.4", "2.5"] });
+  { alphabet: ["1.2", "2.2"], sleep: ["1.3", "2.6"], anchor: ["1.4"], planes: ["2.1", "2.3"], trip: ["2.4", "2.5"], paidwork: ["7.3"] });
 assert.deepEqual(Object.fromEntries(Object.values(RECORD_TOPICS).map(t => [t.id, t.fields.map(f => `${f.id}:${f.kind}`)])), {
   alphabet: ["how:choice", "tries:int", "seconds:decimal"], sleep: ["wakes:choice", "sleepy:choice", "wake:clock", "hours:decimal", "weekend:clock"],
-  anchor: ["trip:choice", "guess:int"], planes: ["metres:decimal"], trip: ["way:choice", "minutes:int"] });
+  anchor: ["trip:choice", "guess:int"], planes: ["metres:decimal"], trip: ["way:choice", "minutes:int"], paidwork: ["worked:choice"] });
 for (const t of Object.values(RECORD_TOPICS)) {
   assert.ok(Object.isFrozen(t) && Object.isFrozen(t.fields) && t.fields.every(Object.isFrozen), t.id);
   assert.equal(getTopic(t.id), null, `${t.id} is not also a chapter 5 topic`);
@@ -339,7 +342,8 @@ assert.equal(getField(RECORD_TOPICS.trip, "minutes").min, TOPICS.commute.min); a
 assert.equal(RECORD_TOPICS.sleep.fields[1].ordered, true); assert.equal(RECORD_TOPICS.sleep.fields[0].ordered, false);
 assert.deepEqual(RECORD_TOPICS.anchor.randomize.groups.map(g => g.id), ["A", "B"]);
 assert.ok(getField(RECORD_TOPICS.anchor, "guess").afterAssign && !getField(RECORD_TOPICS.anchor, "trip").afterAssign);
-assert.ok(RECORD_TOPICS.anchor.linked && RECORD_TOPICS.trip.linked && !RECORD_TOPICS.alphabet.linked && !RECORD_TOPICS.sleep.linked && !RECORD_TOPICS.planes.linked);
+assert.ok(RECORD_TOPICS.anchor.linked && RECORD_TOPICS.trip.linked && !RECORD_TOPICS.alphabet.linked && !RECORD_TOPICS.sleep.linked && !RECORD_TOPICS.planes.linked && !RECORD_TOPICS.paidwork.linked);
+assert.deepEqual(getField(RECORD_TOPICS.paidwork, "worked").options, ["no", "yes"]);
 assert.equal(getRecordTopic("__proto__"), null); assert.equal(getRecordTopic("pulse"), null); assert.equal(getField(RECORD_TOPICS.planes, "toString"), null);
 
 // types and ranges: every kind, both edges, the grid, and the wrong JavaScript types (no strings, no booleans)

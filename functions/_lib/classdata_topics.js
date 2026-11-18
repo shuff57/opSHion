@@ -29,6 +29,16 @@ export const TOPICS = Object.freeze({
     id: 's62-run4', min: 8, max: 36, unit: 'minutes',
     question: 'Play a run of four songs, putting each card back. Add the four lengths',
   }),
+  // 7.1 (2026-11-17): the minutes a student spent getting ready this morning. The starter set is BLS ATUS t010201, ages 15 to 19.
+  'ready-minutes': Object.freeze({
+    id: 'ready-minutes', min: 0, max: 180, unit: 'minutes',
+    question: 'Yesterday, about how many minutes did you spend washing, dressing and grooming?',
+  }),
+  // 7.2 (2026-11-17): the day of the month a student was born. The starter set is FiveThirtyEight's US births 2008 to 2011 (SSA), CC BY 4.0.
+  'birth-day': Object.freeze({
+    id: 'birth-day', min: 1, max: 31, unit: 'day of the month',
+    question: 'The day of the month you were born (1 to 31)',
+  }),
 });
 
 // Tally topics (2026-11-13): a chance-process Investigate pools REAL trials. A student makes many trials, so one device sends a TALLY:
@@ -127,6 +137,14 @@ export const RECORD_TOPICS = Object.freeze({
       { id: 'way', kind: 'choice', label: 'How you got to school today', options: ['car', 'bus or train', 'walk or bike', 'other'], ordered: false },
       { id: 'minutes', kind: 'int', label: 'Minutes it took (one way)', unit: 'minutes', min: 0, max: 180, key: 'commute',
         question: 'Your trip to school today: how many minutes it took, one way' },
+    ],
+  }),
+  // 7.3 (2026-11-17): one yes/no answer per student. The starter is ACS 2024 NH, enrolled students aged 16 to 25 (469 of 901 worked).
+  paidwork: recordTopic({
+    id: 'paidwork', sections: ['7.3'], noun: 'paid work last week',
+    question: 'Did you do any work for pay last week, even for one hour?',
+    fields: [
+      { id: 'worked', kind: 'choice', label: 'Your answer', options: ['no', 'yes'], ordered: false },
     ],
   }),
 });
